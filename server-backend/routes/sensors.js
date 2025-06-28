@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const Sensor = require("../models/schema");
-const { getMessages } = require("../websocket/server");
 
 router.get("/", async (req, res) => {
     const queryLimit = Number(req.query.limit);
@@ -25,9 +24,18 @@ router.get("/latest", async (req, res) => {
     if(latest.length === 0) {
         return res.status(204).send();
     } return res.json(latest[0]);
-    } catch (error) {
+    } catch(error) {
         console.error("Error fetching sensor data:", error);
         return res.status(500).json({ error: "Failed to fetch sensor data" });
+    }
+});
+
+router.get("/count", async (req, res) =>{
+    try {
+        const count = await Sensor.countDocuments();
+        return res.json({ count });
+    } catch(error) {
+        return res.status(500).json({ error: "Failed to fetch count" });
     }
 });
 
