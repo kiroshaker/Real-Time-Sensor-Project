@@ -12,15 +12,19 @@ async function getLatestMessage() {
     return res.data;
 }
 
-async function getKRecentMessages(k) {
+async function getKRecentMessages(since) {
     const res =  await api.get("/routes/sensors", { 
-        params : { limit: k } 
+        params : { limit: since } 
     });
     return res.data;
 }
 
-async function getCount() {
-    const res = await api.get("/routes/sensors/count");
-    return res.data;
+async function getMessagesSince(sinceISOString) {
+  const res = await api.get("/routes/sensors", {
+    params: { since: sinceISOString }
+  });
+  return res.data;
 }
-export { getAllMessages, getLatestMessage, getKRecentMessages, getCount };
+
+
+export { getAllMessages, getLatestMessage, getKRecentMessages, getMessagesSince };

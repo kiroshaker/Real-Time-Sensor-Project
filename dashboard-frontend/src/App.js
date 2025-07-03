@@ -1,58 +1,51 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import { getAllMessages, getLatestMessage, getKRecentMessages } from './services/api';
+import { getLatestMessage, getMessagesSince } from './services/api';
 import SensorChart from './components/SensorChart'
 
 function App() {
   const [messages, setMessages] = useState([]);
-  const [mode, setMode] = useState("all"); 
-  const [kValue, setKValue] = useState(5);
+  const [mode, setMode] = useState("Last 10 minutes"); 
+  const [selectedMinutes, setSelectedMinutes] = useState(10);
+  const timeOptions = [
+  { label: "Last 10 minutes", value: 10 },
+  { label: "Last 30 minutes", value: 30 },
+  { label: "Last hour", value: 60 },
+  { label: "Last 6 hours", value: 360 },
+  { label: "Last 24 hours", value: 1440 },
+  { label: "Last week", value: 10080 }
+  ];
+  function handleTimeChange(e) {
+  const minutes = Number(e.target.value);
+  setSelectedMinutes(minutes);
+  setMode("time-range");  // Optional if you’re using a mode switch
+  }
 
-  // This effect only runs once on mount to set maxK
   useEffect(() => {
-    async function fetchMessages() {
-      try {
-        if(mode === "all") {
-          const res = await getAllMessages();
-          setMessages(res);
-        } else if(mode === "latest") {
-          const res = await getLatestMessage();
-          setMessages([res]);
-        } else if (mode === "k") {
-          const res = await getKRecentMessages(kValue);
-          setMessages(res);
-        }
+    async function fetchTimeRangeData() {
+    const since = new Date(Date.now() - selectedMinutes * 60 * 1000).toISOString();
+    const data = await getMessagesSince(since); 
+    setMessages(data);
+  }
 
-      } catch(err) {
-        console.error("Failed to fetch messages: ", err);
-      }
-    }
-
-    fetchMessages();
-  }, [mode, kValue]);
+  if (mode === "time-range") {
+    fetchTimeRangeData();
+  }
+  }, [mode, selectedMinutes]);
 
   return (
     <div className="dashboard-container">
       <h1> Real-Time Sensor Dashboard</h1>
 
       <div className="button-group">
-        <button disabled={mode === "all"} onClick={() => setMode("all")}>All Entries</button>
-        <button disabled={mode === "latest"} onClick={() => setMode("latest")}>Latest Entry</button>
-        <button disabled={mode === "k"} onClick={() => setMode("k")}>Enter Entry Count</button>
-
+        <select value={selectedMinutes} onChange={handleTimeChange}>
+        {timeOptions.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+        {opt.label}
+        </option>
+        ))}
+        </select>
       </div>
-
-      {mode === "k" && (
-        <div className="k-input"> 
-          <label>Choose # of Entries: </label>
-          <input
-            type="number"
-            value={ kValue }
-            onChange={(e) => setKValue(Number(e.target.value))}
-            min="1"
-          />
-        </div>
-      )}
       <ul className='message-list'>
         {messages.map((msg, index) => (
           <li key={index} className='message-item'>
