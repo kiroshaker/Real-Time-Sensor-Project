@@ -2,15 +2,16 @@ const express = require("express");
 const router = express.Router();
 const Sensor = require("../models/schema");
 
+
 router.get("/", async (req, res) => {
-    const queryLimit = Number(req.query.limit);
+    const timeLimit = new Date(req.query.since);
+    const query = {};
     try {
-        let query = Sensor.find().sort({ timestamp: -1});
-        if(!isNaN(queryLimit) && queryLimit > 0) {
-            query = query.limit(queryLimit);
+        if(timeLimit && !isNaN(timeLimit)) {
+            query.timestamp = { $gte: new Date(timeLimit) };
         }
-        const results = await query.exec();
-        
+
+        const results = await Sensor.find(query).sort({ timestamp: 1 }).exec();
         return res.json(results);
     } catch(error) {
         console.error("Error fetching sensor data:", error);

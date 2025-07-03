@@ -1,6 +1,7 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import { getAllMessages, getLatestMessage, getKRecentMessages } from './services/api';
+import SensorChart from './components/SensorChart'
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -42,7 +43,7 @@ function App() {
       </div>
 
       {mode === "k" && (
-        <div className="enter-k"> 
+        <div className="k-input"> 
           <label>Choose # of Entries: </label>
           <input
             type="number"
@@ -55,10 +56,21 @@ function App() {
       <ul className='message-list'>
         {messages.map((msg, index) => (
           <li key={index} className='message-item'>
-              Temperature: {msg.temperature}°F | Humidity: {msg.humidity}% | Time: {new Date(msg.timestamp).toLocaleString()}
+              Temperature: {msg.temperature}°F | Humidity: {msg.humidity}% | Time: {new Intl.DateTimeFormat('en-US', { 
+                                                                                      year: 'numeric',
+                                                                                      month: 'short',
+                                                                                      day: 'numeric',
+                                                                                      hour: 'numeric',
+                                                                                      minute: '2-digit',
+                                                                                      hour12: true
+                                                                                      }).format(new Date(msg.timestamp))
+                                                                                  }
           </li>
         ))}
       </ul>
+      <div className='sensor-chart'>
+        <SensorChart messages={messages} />
+      </div>
     </div>
   );
 }

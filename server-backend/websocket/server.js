@@ -17,7 +17,7 @@ function initWebSocket(server) {
 
         //Listen for messages from this client
         ws.on('message', async (data) => {
-            sensorData = parseSensorData(data);
+            const sensorData = parseSensorData(data);
             if(sensorData != null) {
                 broadcast(wss, JSON.stringify(sensorData));
                 console.log('Message received');
