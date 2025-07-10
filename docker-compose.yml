@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: ./server-backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./server-backend:/app
+    env_file:
+      - ./server-backend/.env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./dashboard-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dashboard-frontend:/usr/src/app
+    working_dir: /usr/src/app
+    command: npm start
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    restart: unless-stopped

@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import { getLatestMessage, getMessagesSince } from './services/api';
+import { getMessagesSince } from './services/api';
 import SensorChart from './components/SensorChart'
 
 function App() {
@@ -32,6 +32,31 @@ function App() {
     fetchTimeRangeData();
   }
   }, [mode, selectedMinutes]);
+
+  useEffect(() => {
+  const socket = new WebSocket("ws://localhost:4000/ws"); // adjust if using domain/IP
+
+  socket.onopen = () => {
+    console.log("WebSocket connection established");
+  };
+
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    setMessages((prevMessages) => [...prevMessages, data]);
+  };
+
+  socket.onclose = () => {
+    console.log("WebSocket connection closed");
+  };
+
+  socket.onerror = (err) => {
+    console.error("WebSocket error:", err);
+  };
+
+  return () => {
+    socket.close();
+  };
+}, []);
 
   return (
     <div className="dashboard-container">
